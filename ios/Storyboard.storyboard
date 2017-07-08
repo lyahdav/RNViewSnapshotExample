@@ -51,9 +51,12 @@
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="5lT-9O-F0W" sceneMemberID="viewController">
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="5cC-ON-XvQ">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" id="5cC-ON-XvQ">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <textAttributes key="titleTextAttributes">
+                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        </textAttributes>
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>

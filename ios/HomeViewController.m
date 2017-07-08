@@ -39,6 +39,7 @@
 
 @interface HomeViewController () <RCTBridgeDelegate>
 
+@property (nonatomic) id flushObserver;
 @end
 
 @implementation HomeViewController
@@ -57,13 +58,15 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
 }
 
 - (IBAction)didTapStandardInit:(id)sender {
-    NSURL *jsCodeLocation;
+    NSDate *startLoadDate = [NSDate date];
+
+    // For loading in dev from packager
+    NSURL *jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
     
-    jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+//    NSURL *jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
     
     RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
                                                         moduleName:@"RNViewSnapshotExample"
@@ -73,11 +76,22 @@
     
     UIViewController *rootViewController = [RootRNViewController new];
     rootViewController.view = rootView;
+    rootViewController.title = @"Loading...";
     
+    self.flushObserver = [[NSNotificationCenter defaultCenter] addObserverForName:@"RCTUIManagerFinishedFlushNotification" object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
+        NSDate *endLoadDate = [NSDate date];
+        NSTimeInterval loadDuration = [endLoadDate timeIntervalSinceDate:startLoadDate];
+        NSString *title = [NSString stringWithFormat:@"%.02fs", loadDuration];
+        rootViewController.title = title;
+        [[NSNotificationCenter defaultCenter] removeObserver:self.flushObserver];
+    }];
+
     [self.navigationController pushViewController:rootViewController animated:YES];
 }
 
 - (IBAction)didTapSnapshotInit:(id)sender {
+    NSDate *startLoadDate = [NSDate date];
+    
     [RCTDevLoadingView setEnabled:NO];
     
     RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:nil];
@@ -107,8 +121,17 @@
     
     UIViewController *rootViewController = [UIViewController new];
     rootViewController.view = rootView;
+    rootViewController.title = @"Loading...";
     
     [self.navigationController pushViewController:rootViewController animated:YES];
+
+    self.flushObserver = [[NSNotificationCenter defaultCenter] addObserverForName:@"RCTUIManagerFinishedFlushNotification" object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
+        NSDate *endLoadDate = [NSDate date];
+        NSTimeInterval loadDuration = [endLoadDate timeIntervalSinceDate:startLoadDate];
+        NSString *title = [NSString stringWithFormat:@"%.02fs", loadDuration];
+        rootViewController.title = title;
+        [[NSNotificationCenter defaultCenter] removeObserver:self.flushObserver];
+    }];
 
     // TODO: remove this delay, but causes deadlock or weird rendering w/o it
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.01 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
@@ -122,10 +145,9 @@
             }
             
             [bridge.uiManager batchDidComplete];
+            
         });
     });
-    
-
 }
 
 @end
