@@ -9,10 +9,22 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
-  View
+  View,
+  Button,
+  NativeModules
 } from 'react-native';
 
 export default class RNViewSnapshotExample extends Component {
+  onPressPrintSnapshot() {
+    const ViewSnapshotter = NativeModules.ViewSnapshotter;
+    ViewSnapshotter.printSnapshot();
+  }
+
+  onPressSaveSnapshot() {
+    const ViewSnapshotter = NativeModules.ViewSnapshotter;
+    ViewSnapshotter.saveSnapshot();
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -26,6 +38,14 @@ export default class RNViewSnapshotExample extends Component {
           Press Cmd+R to reload,{'\n'}
           Cmd+D or shake for dev menu
         </Text>
+        <Button
+          onPress={this.onPressPrintSnapshot}
+          title="Print Snapshot"
+        />
+        <Button
+          onPress={this.onPressSaveSnapshot}
+          title="Save Snapshot"
+        />
       </View>
     );
   }
