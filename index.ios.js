@@ -29,19 +29,11 @@ export default class RNViewSnapshotExample extends Component {
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>
-          Welcome to React Native!2
+          Hello World
         </Text>
         <Text style={styles.instructions}>
-          To get started, edit index.ios.js
+          Tap Save to save snapshot to disk
         </Text>
-        <Text style={styles.instructions}>
-          Press Cmd+R to reload,{'\n'}
-          Cmd+D or shake for dev menu
-        </Text>
-        <Button
-          onPress={this.onPressPrintSnapshot}
-          title="Print Snapshot"
-        />
         <Button
           onPress={this.onPressSaveSnapshot}
           title="Save Snapshot"
