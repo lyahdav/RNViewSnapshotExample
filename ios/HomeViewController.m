@@ -102,6 +102,8 @@
 }
 
 - (IBAction)didTapSnapshotInit:(id)sender {
+    BOOL loadBundleFromURL = YES;
+    
     NSDate *startLoadDate = [NSDate date];
     
     [RCTDevLoadingView setEnabled:NO];
@@ -126,16 +128,18 @@
     NSArray *viewSnapshots = [NSJSONSerialization JSONObjectWithData:[content dataUsingEncoding:NSUTF8StringEncoding]
                                                           options:0 error:NULL];
     
-    RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:nil];
-    NSURL *jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
-
-    RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge moduleName:@"RNViewSnapshotExample" initialProperties:nil];
-    
-//    RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:nil
-//                                                        moduleName:@"RNViewSnapshotExample"
-//                                                 initialProperties:nil
-//                                                     launchOptions:nil];
-
+    RCTRootView *rootView = nil;
+    if (loadBundleFromURL) {
+        NSURL *jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+        rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
+                                                            moduleName:@"RNViewSnapshotExample"
+                                                     initialProperties:nil
+                                                         launchOptions:nil];
+        
+    } else {
+        RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:nil];
+        rootView = [[RCTRootView alloc] initWithBridge:bridge moduleName:@"RNViewSnapshotExample" initialProperties:nil];
+    }
     rootView.backgroundColor = [[UIColor alloc] initWithRed:1.0f green:1.0f blue:1.0f alpha:1];
     
     UIViewController *rootViewController = [UIViewController new];
