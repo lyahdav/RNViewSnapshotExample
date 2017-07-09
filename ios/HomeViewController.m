@@ -35,6 +35,7 @@
              props:(NSDictionary *)props;
 - (void)setChildren:(nonnull NSNumber *)containerTag
           reactTags:(NSArray<NSNumber *> *)reactTags;
+
 @end
 
 @interface HomeViewController () <RCTBridgeDelegate>
@@ -94,8 +95,6 @@
     
     [RCTDevLoadingView setEnabled:NO];
     
-    RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:nil];
-
     NSString* documentsPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
     
     NSString* filePath = [documentsPath stringByAppendingPathComponent:@"view-snapshot.json"];
@@ -116,7 +115,13 @@
     NSArray *viewSnapshots = [NSJSONSerialization JSONObjectWithData:[content dataUsingEncoding:NSUTF8StringEncoding]
                                                           options:0 error:NULL];
     
-    RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge moduleName:@"RNViewSnapshotExample" initialProperties:nil];
+    NSURL *jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+    
+    RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
+                                                        moduleName:@"RNViewSnapshotExample"
+                                                 initialProperties:nil
+                                                     launchOptions:nil];
+
     rootView.backgroundColor = [[UIColor alloc] initWithRed:1.0f green:1.0f blue:1.0f alpha:1];
     
     UIViewController *rootViewController = [UIViewController new];
@@ -138,14 +143,13 @@
         dispatch_async(RCTGetUIManagerQueue(), ^{
             for (NSDictionary *viewSnapshot in viewSnapshots) {
                 if ([viewSnapshot[@"type"] isEqualToString:@"create"]) {
-                    [bridge.uiManager createView:viewSnapshot[@"reactTag"] viewName:viewSnapshot[@"viewName"] rootTag:viewSnapshot[@"rootTag"] props:viewSnapshot[@"props"] == [NSNull null] ? @{} : viewSnapshot[@"props"]];
+                    [rootView.bridge.uiManager createView:viewSnapshot[@"reactTag"] viewName:viewSnapshot[@"viewName"] rootTag:viewSnapshot[@"rootTag"] props:viewSnapshot[@"props"] == [NSNull null] ? @{} : viewSnapshot[@"props"]];
                 } else if ([viewSnapshot[@"type"] isEqualToString:@"setChildren"]) {
-                    [bridge.uiManager setChildren:viewSnapshot[@"containerTag"] reactTags:viewSnapshot[@"reactTags"]];
+                    [rootView.bridge.uiManager setChildren:viewSnapshot[@"containerTag"] reactTags:viewSnapshot[@"reactTags"]];
                 }
             }
             
-            [bridge.uiManager batchDidComplete];
-            
+            [rootView.bridge.uiManager batchDidComplete];
         });
     });
 }

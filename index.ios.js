@@ -13,6 +13,7 @@ import {
   Button,
   NativeModules
 } from 'react-native';
+import FlatListDemo from "./FlatListDemo";
 
 export default class RNViewSnapshotExample extends Component {
   onPressPrintSnapshot() {
@@ -38,6 +39,7 @@ export default class RNViewSnapshotExample extends Component {
           onPress={this.onPressSaveSnapshot}
           title="Save Snapshot"
         />
+        <FlatListDemo />
       </View>
     );
   }
