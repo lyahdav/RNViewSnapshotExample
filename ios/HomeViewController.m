@@ -35,6 +35,7 @@
              props:(NSDictionary *)props;
 - (void)setChildren:(nonnull NSNumber *)containerTag
           reactTags:(NSArray<NSNumber *> *)reactTags;
+- (void)removeSubviewsFromContainerWithID:(nonnull NSNumber *)containerID;
 
 @end
 
@@ -156,6 +157,8 @@
         [[NSNotificationCenter defaultCenter] removeObserver:self.flushObserver];
     }];
 
+    NSNumber *rootViewID = rootView.reactTag;
+    
     // TODO: remove this delay, but causes deadlock or weird rendering w/o it
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.01 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         dispatch_async(RCTGetUIManagerQueue(), ^{
@@ -168,6 +171,7 @@
             }
             
             [rootView.bridge.uiManager batchDidComplete];
+            [rootView.bridge.uiManager removeSubviewsFromContainerWithID:rootViewID];
         });
     });
 }
