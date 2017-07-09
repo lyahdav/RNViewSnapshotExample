@@ -170,8 +170,8 @@
                 }
             }
             
+            
             [rootView.bridge.uiManager batchDidComplete];
-            [rootView.bridge.uiManager removeSubviewsFromContainerWithID:rootViewID];
         });
     });
 }

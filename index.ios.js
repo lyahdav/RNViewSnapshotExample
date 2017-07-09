@@ -36,7 +36,7 @@ export default class RNViewSnapshotExample extends Component {
   }
 
   render() {
-    pausecomp(5000);
+    pausecomp(3000);
     return (
 
       <View style={styles.container}>
