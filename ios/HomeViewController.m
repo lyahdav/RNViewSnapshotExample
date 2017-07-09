@@ -61,12 +61,17 @@
     [super viewDidLoad];
 }
 
+- (void)didTapSnapshotButton {
+    [[RCTViewSnapshotter sharedInstance] saveSnapshot];
+}
+
 - (IBAction)didTapStandardInit:(id)sender {
     NSDate *startLoadDate = [NSDate date];
 
     // For loading in dev from packager
     NSURL *jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
     
+    // For loading from production packaged bundle
 //    NSURL *jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
     
     RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
@@ -78,6 +83,12 @@
     UIViewController *rootViewController = [RootRNViewController new];
     rootViewController.view = rootView;
     rootViewController.title = @"Loading...";
+    UIBarButtonItem *snapshotButton = [[UIBarButtonItem alloc]
+                                   initWithTitle:@"Save Snapshot"
+                                   style:UIBarButtonItemStylePlain
+                                   target:self
+                                   action:@selector(didTapSnapshotButton)];
+    rootViewController.navigationItem.rightBarButtonItem = snapshotButton;
     
     self.flushObserver = [[NSNotificationCenter defaultCenter] addObserverForName:@"RCTUIManagerFinishedFlushNotification" object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
         NSDate *endLoadDate = [NSDate date];
@@ -115,12 +126,15 @@
     NSArray *viewSnapshots = [NSJSONSerialization JSONObjectWithData:[content dataUsingEncoding:NSUTF8StringEncoding]
                                                           options:0 error:NULL];
     
+    RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:nil];
     NSURL *jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+
+    RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge moduleName:@"RNViewSnapshotExample" initialProperties:nil];
     
-    RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
-                                                        moduleName:@"RNViewSnapshotExample"
-                                                 initialProperties:nil
-                                                     launchOptions:nil];
+//    RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:nil
+//                                                        moduleName:@"RNViewSnapshotExample"
+//                                                 initialProperties:nil
+//                                                     launchOptions:nil];
 
     rootView.backgroundColor = [[UIColor alloc] initWithRed:1.0f green:1.0f blue:1.0f alpha:1];
     
