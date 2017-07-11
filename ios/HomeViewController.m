@@ -36,6 +36,7 @@
 - (void)setChildren:(nonnull NSNumber *)containerTag
           reactTags:(NSArray<NSNumber *> *)reactTags;
 - (void)removeSubviewsFromContainerWithID:(nonnull NSNumber *)containerID;
+- (void)removeRootView:(nonnull NSNumber *)rootReactTag;
 
 @end
 
@@ -83,19 +84,19 @@
     
     UIViewController *rootViewController = [RootRNViewController new];
     rootViewController.view = rootView;
-    rootViewController.title = @"Loading...";
+//    rootViewController.title = @"Loading...";
     UIBarButtonItem *snapshotButton = [[UIBarButtonItem alloc]
                                    initWithTitle:@"Save Snapshot"
                                    style:UIBarButtonItemStylePlain
                                    target:self
                                    action:@selector(didTapSnapshotButton)];
     rootViewController.navigationItem.rightBarButtonItem = snapshotButton;
-    
+
     self.flushObserver = [[NSNotificationCenter defaultCenter] addObserverForName:@"RCTUIManagerFinishedFlushNotification" object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
-        NSDate *endLoadDate = [NSDate date];
-        NSTimeInterval loadDuration = [endLoadDate timeIntervalSinceDate:startLoadDate];
-        NSString *title = [NSString stringWithFormat:@"%.02fs", loadDuration];
-        rootViewController.title = title;
+//        NSDate *endLoadDate = [NSDate date];
+//        NSTimeInterval loadDuration = [endLoadDate timeIntervalSinceDate:startLoadDate];
+//        NSString *title = [NSString stringWithFormat:@"%.02fs", loadDuration];
+//        rootViewController.title = title;
         [[NSNotificationCenter defaultCenter] removeObserver:self.flushObserver];
     }];
 
@@ -105,8 +106,8 @@
 - (IBAction)didTapSnapshotInit:(id)sender {
     BOOL loadBundleFromURL = YES;
     
-    NSDate *startLoadDate = [NSDate date];
-    
+//    NSDate *startLoadDate = [NSDate date];
+
     [RCTDevLoadingView setEnabled:NO];
     
     NSString* documentsPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
@@ -123,7 +124,8 @@
         [alert show];
         return;
     }
-    
+
+    NSLog(@"Loading snapshot from %@", filePath);
     NSString *content = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:NULL];
     
     NSArray *viewSnapshots = [NSJSONSerialization JSONObjectWithData:[content dataUsingEncoding:NSUTF8StringEncoding]
@@ -145,20 +147,20 @@
     
     UIViewController *rootViewController = [UIViewController new];
     rootViewController.view = rootView;
-    rootViewController.title = @"Loading...";
-    
+//    rootViewController.title = @"Loading...";
+
     [self.navigationController pushViewController:rootViewController animated:YES];
 
     self.flushObserver = [[NSNotificationCenter defaultCenter] addObserverForName:@"RCTUIManagerFinishedFlushNotification" object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
-        NSDate *endLoadDate = [NSDate date];
-        NSTimeInterval loadDuration = [endLoadDate timeIntervalSinceDate:startLoadDate];
-        NSString *title = [NSString stringWithFormat:@"%.02fs", loadDuration];
-        rootViewController.title = title;
+//        NSDate *endLoadDate = [NSDate date];
+//        NSTimeInterval loadDuration = [endLoadDate timeIntervalSinceDate:startLoadDate];
+//        NSString *title = [NSString stringWithFormat:@"%.02fs", loadDuration];
+//        rootViewController.title = title;
         [[NSNotificationCenter defaultCenter] removeObserver:self.flushObserver];
     }];
 
     NSNumber *rootViewID = rootView.reactTag;
-    
+
     // TODO: remove this delay, but causes deadlock or weird rendering w/o it
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.01 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         dispatch_async(RCTGetUIManagerQueue(), ^{
@@ -169,9 +171,12 @@
                     [rootView.bridge.uiManager setChildren:viewSnapshot[@"containerTag"] reactTags:viewSnapshot[@"reactTags"]];
                 }
             }
-            
-            
+
+            [RCTViewSnapshotter sharedInstance].didLoadSnapshot = YES;
+            [RCTViewSnapshotter sharedInstance].uiManager = rootView.bridge.uiManager;
+            [RCTViewSnapshotter sharedInstance].rootViewID = rootViewID;
             [rootView.bridge.uiManager batchDidComplete];
+
         });
     });
 }
